@@ -1,0 +1,1 @@
+Actualmente los reportes de la prueba de performance estan dentro de la pagina de gatling.

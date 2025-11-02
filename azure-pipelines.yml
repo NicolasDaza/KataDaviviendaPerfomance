@@ -1,0 +1,52 @@
+# ==========================================================
+# Azure DevOps Pipeline - KataDaviviendaPerfomance (Node.js + Gatling)
+# Repositorio: https://github.com/NicolasDaza/KataDaviviendaPerfomance
+# ==========================================================
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+  
+ # Importa las variables del grupo KataDaviviendaPerformanceAPI
+variables:
+- group: KataDaviviendaPerformanceAPI
+
+steps:
+
+ # Clonar el repositorio
+  - checkout: none
+  - script: |
+      git clone https://github.com/NicolasDaza/KataDaviviendaPerfomance.git
+      cd KataDaviviendaPerfomance
+      ls -la
+    displayName: 'Clonar el repositorio KataDaviviendaPerfomance desde GitHub'
+
+  # 2Configurar variable de entorno para Gatling
+  - script: |
+      echo "Configurando variable de entorno para Gatling..."
+      echo "##vso[task.setvariable variable=GATLING_ENTERPRISE_API_TOKEN]$GATLING_ENTERPRISE_API_TOKEN"
+    displayName: 'Configurar token de Gatling'
+
+  # Instalar Node.js
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Instalar Node.js'
+
+  # Instalar dependencias npm
+  - script: |
+      cd KataDaviviendaPerfomance
+      npm install
+    displayName: 'Instalar dependencias con npm'
+
+  # Ejecutar deploy a Gatling Enterprise
+  - script: |
+      cd KataDaviviendaPerfomance
+      echo "Desplegando a Gatling Enterprise..."
+      npx gatling enterprise-deploy
+    displayName: 'Ejecutar despliegue en Gatling Enterprise'
+    env:
+      GATLING_ENTERPRISE_API_TOKEN: $(GATLING_ENTERPRISE_API_TOKEN)
